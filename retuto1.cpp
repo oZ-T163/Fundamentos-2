@@ -415,7 +415,7 @@ int main()
 
     GLuint unit = 0;
     glActiveTexture(GL_TEXTURE0 + unit);
-    Texture = loadDDS("test_textura_PNG_DXT1_1.DDS");
+    
     glUniform1i(glGetUniformLocation(programID, "myTextureSampler"), unit);
 
     glGenBuffers(1, &uvbuffer);
@@ -429,9 +429,37 @@ int main()
 
     double deltaTime = 0;
     triangle2.pos = vec3(0,0,-1.5);
+
+    int k = 0;
     do
     {
+        
+        if(glfwGetKey(window, GLFW_KEY_0))
+        {
+            k = 0;
+        }
+        if(glfwGetKey(window, GLFW_KEY_1))
+        {
+            k = 1;
+        }
+        if(glfwGetKey(window, GLFW_KEY_2))
+        {
+            k = 2;
+        }
 
+        switch(k)
+        {
+            case 0 : Texture = loadDDS("test_textura_PNG_DXT1_1.DDS");
+                     break;
+
+            case 1 : Texture = loadDDS("Sven_256.DDS");
+                     break;
+
+            case 2 : Texture = loadDDS("Sven_128.DDS");
+                     break;
+        }
+        
+        
         //getsTime Dif
         t_start = t_end;
         t_end = std::chrono::high_resolution_clock::now();
@@ -466,6 +494,8 @@ int main()
         // Swap buffers
         glfwSwapBuffers(window);
         glfwPollEvents();
+
+            
 
     } // Check if the ESC key was pressed or the window was closed
     while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&

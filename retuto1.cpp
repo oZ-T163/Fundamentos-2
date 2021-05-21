@@ -34,12 +34,17 @@ const unsigned long FOURCC_DXT3 = 0x33545844; //(MAKEFOURCC('D','X','T','3'))
 const unsigned long FOURCC_DXT5 = 0x35545844; //(MAKEFOURCC('D','X','T','5'))
 
 double timeToShader = 3;
+double timer = 0;
+double routine = 0;
 // This will identify our vertex buffer
 GLuint vertexbuffer[2];
 GLuint programID;
 GLuint programID2;
 GLuint uvbuffer;
 GLuint Texture;
+GLuint Texture2;
+GLuint lightingShader;
+
 
 class Triangle
 {
@@ -239,6 +244,7 @@ void Scene1(double deltaTime)
 
 void Scene2(double deltaTime, GLFWwindow *window)
 {
+    
     // Draw triangle...
 	bool rotate = true;
     glUseProgram(programID);
@@ -341,11 +347,63 @@ void Scene2(double deltaTime, GLFWwindow *window)
         }
 	}
 	
+    routine += deltaTime;
+    if(routine > 7) routine = 0;
+    
+    if(routine < 2.0f)
+    {
+        triangle2.Translate(vec3(deltaTime,deltaTime,0));
+    }
+    if(routine > 2.0f && routine < 3.5f)
+    {
+        triangle2.Rotate(vec3(0,0,-deltaTime));
+    }
+    if(routine > 3.5f && routine < 5.5f)
+    {
+        triangle2.Translate(vec3(-deltaTime,deltaTime,0));
+    }
+    if(routine > 5.5f)
+    {
+        triangle2.Rotate(vec3(0,0,deltaTime));
+    }
+    
+
+    
+
 
 
     triangle1.PassToBuffer(g_vertex_buffer_data1);
-    //triangle2.PassToBuffer(g_vertex_buffer_data2);
+    triangle2.PassToBuffer(g_vertex_buffer_data2);
     
+}
+
+void gif(double timer)
+{
+    int k = (int) timer;
+    switch(k)
+    {
+        case 1: Texture = loadDDS("1.DDS");break;
+
+        case 2: Texture = loadDDS("2.DDS");break;
+
+        case 3: Texture = loadDDS("3.DDS");break;
+
+        case 4: Texture = loadDDS("4.DDS");break;
+
+        case 5: Texture = loadDDS("5.DDS");break;
+
+        case 6: Texture = loadDDS("6.DDS");break;
+
+        case 7: Texture = loadDDS("7.DDS");break;
+
+        case 8: Texture = loadDDS("8.DDS");break;
+
+        case 9: Texture = loadDDS("9.DDS");break;
+        
+        case 10: Texture = loadDDS("10.DDS");break;
+
+        default : Texture = loadDDS("1.DDS");
+    }
 }
 
 int main()
@@ -414,30 +472,31 @@ int main()
     glNamedBufferData(VertexArrayID[1], sizeof(g_vertex_buffer_data2), g_vertex_buffer_data2, GL_STATIC_DRAW);
 
     GLuint unit = 0;
+    GLuint unit1 = 1;
     glActiveTexture(GL_TEXTURE0 + unit);
     
     glUniform1i(glGetUniformLocation(programID, "myTextureSampler"), unit);
 
+
     glGenBuffers(1, &uvbuffer);
     glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(g_uv_buffer_data), g_uv_buffer_data, GL_STATIC_DRAW);
-
 
     auto t_start = std::chrono::high_resolution_clock::now();
     // the work...
     auto t_end = std::chrono::high_resolution_clock::now();
 
     double deltaTime = 0;
-    triangle2.pos = vec3(0,0,-1.5);
+    double deltaTime2 = 0;
+    triangle2.pos = vec3(0,0.5,-0.1);
 
     int k = 0;
     do
     {
+         timer += deltaTime2;
+
+        if(timer > 1.0f) timer = 0;
         
-        if(glfwGetKey(window, GLFW_KEY_0))
-        {
-            k = 0;
-        }
         if(glfwGetKey(window, GLFW_KEY_1))
         {
             k = 1;
@@ -446,17 +505,22 @@ int main()
         {
             k = 2;
         }
+        if(glfwGetKey(window, GLFW_KEY_3))
+        {
+            k = 3;
+        }
 
         switch(k)
         {
-            case 0 : Texture = loadDDS("test_textura_PNG_DXT1_1.DDS");
+            case 1 : Texture = loadDDS("test_textura_PNG_DXT1_1.DDS");
                      break;
 
-            case 1 : Texture = loadDDS("Sven_256.DDS");
+            case 2 : Texture = loadDDS("Sven_256.DDS");
                      break;
 
-            case 2 : Texture = loadDDS("Sven_128.DDS");
+            case 3 : gif(timer*10);
                      break;
+            default : Texture = loadDDS("test_textura_PNG_DXT1_1.DDS");
         }
         
         
@@ -465,6 +529,10 @@ int main()
         t_end = std::chrono::high_resolution_clock::now();
 
         deltaTime = std::chrono::duration<double>(t_end - t_start).count();
+        deltaTime2 = std::chrono::duration<double>(t_end - t_start).count();
+
+       
+
 
         /*timeToShader -= deltaTime;
         if (timeToShader < 0)
